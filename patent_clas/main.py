@@ -8,18 +8,23 @@ from transformers import BertJapaneseTokenizer
 from patent_clas import model
 
 class model():
-    def __init__(self, numlabel, size = 128, layer = 1, dropout = 0.2, model_name='cl-tohoku/bert-base-japanese-v2', max_length = 512, result_path=None ,model_path = None, multi_gpu = False):
+    def __init__(self, numlabel, twotext=False, size = 128, layer = 1, dropout = 0.2, model_name='cl-tohoku/bert-base-japanese-v2', max_length1 = 512, max_length2 = 256, result_path=None ,model_path = None, multi_gpu = False):
         if model_path==None & result_path==None:
             raise Exception("result_pathかmodel_pathを入力してください") 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') #GPUがつかえたらGPUを利用
-        self.model = model.Bertmulticlassficationmodel(numlabel, model_name, size, layer, dropout)
+        if twotext:
+            self.model = model.Bertmodel_twotexts(numlabel, model_name, size, layer, dropout)
+        else:
+            self.model = model.Bertmodel_onetext(numlabel, model_name, size, layer, dropout)
         self.tokenizer = BertJapaneseTokenizer.from_pretrained(model_name)
         if model_path:
             self.model.load_state_dict(torch.load(model_path)["model_state_dict"])
         if multi_gpu > 0:
             self.model = nn.DataParallel(self.model,range(multi_gpu))
         self.multi_gpu = multi_gpu
-        self.max_len = max_length
+        self.max_len1 = max_length1
+        self.max_len2 = max_length2
+        self.twotext = twotext
         self.loss_list = []
         self.val_list = []
         if result_path:
@@ -42,11 +47,19 @@ class model():
             j=0
             for data in tqdm(train):
                 j+=1
-                text, ipc, labels = data
-                inputs = self.tokenizer(text, max_length=self.max_len ,padding="max_length", truncation=True, return_tensors="pt")
-                inputs = {k: v.to(self.device) for k, v in inputs.items()}
-                ipc = ipc.float().to(self.device)
-                outputs = self.model(inputs, ipc)
+                text1, text2, ipc, labels = data
+                if self.twotext:
+                    text1 = self.tokenizer(text1, max_length=self.max_len1 ,padding="max_length", truncation=True, return_tensors="pt")
+                    text1 = {k: v.to(self.device) for k, v in text1.items()}
+                    text2 = self.tokenizer(text2, max_length=self.max_len2 ,padding="max_length", truncation=True, return_tensors="pt")
+                    text2 = {k: v.to(self.device) for k, v in text2.items()}
+                    ipc = ipc.float().to(self.device)
+                    outputs = self.model(text1, text2, ipc)
+                else:
+                    text1 = self.tokenizer(text1, max_length=self.max_len1 ,padding="max_length", truncation=True, return_tensors="pt")
+                    text1 = {k: v.to(self.device) for k, v in text1.items()}
+                    ipc = ipc.float().to(self.device)
+                    outputs = self.model(text1, ipc)
                 loss = criterion(outputs, labels.to(self.device))
                 loss = loss/grad_accum_step
                 loss.backward()
@@ -88,10 +101,18 @@ class model():
         criterion = nn.BCEWithLogitsLoss()
         for data in tqdm(test):
             text, ipc, labels = data
-            inputs = self.tokenizer(text, max_length=self.max_len ,padding="max_length", truncation=True, return_tensors="pt")
-            inputs = {k: v.to(self.device) for k, v in inputs.items()}
-            ipc = ipc.float().to(self.device)
-            outputs = self.model(inputs, ipc)
+            if self.twotext:
+                text1 = self.tokenizer(text1, max_length=self.max_len1 ,padding="max_length", truncation=True, return_tensors="pt")
+                text1 = {k: v.to(self.device) for k, v in text1.items()}
+                text2 = self.tokenizer(text2, max_length=self.max_len2 ,padding="max_length", truncation=True, return_tensors="pt")
+                text2 = {k: v.to(self.device) for k, v in text2.items()}
+                ipc = ipc.float().to(self.device)
+                outputs = self.model(text1, text2, ipc)
+            else:
+                text1 = self.tokenizer(text1, max_length=self.max_len1 ,padding="max_length", truncation=True, return_tensors="pt")
+                text1 = {k: v.to(self.device) for k, v in text1.items()}
+                ipc = ipc.float().to(self.device)
+                outputs = self.model(text1, ipc)
             loss = criterion(outputs, labels.to(self.device))
             all+=len(data)
             vali_loss += loss.item()
@@ -105,10 +126,18 @@ class model():
         pred_list=None
         for data in tqdm(test):
             text, ipc, labels = data
-            inputs = self.tokenizer(text, max_length=self.max_len ,padding="max_length", truncation=True, return_tensors="pt")
-            inputs = {k: v.to(self.device) for k, v in inputs.items()}
-            ipc = ipc.float().to(self.device)
-            outputs = model(inputs,ipc)
+            if self.twotext:
+                text1 = self.tokenizer(text1, max_length=self.max_len1 ,padding="max_length", truncation=True, return_tensors="pt")
+                text1 = {k: v.to(self.device) for k, v in text1.items()}
+                text2 = self.tokenizer(text2, max_length=self.max_len2 ,padding="max_length", truncation=True, return_tensors="pt")
+                text2 = {k: v.to(self.device) for k, v in text2.items()}
+                ipc = ipc.float().to(self.device)
+                outputs = self.model(text1, text2, ipc)
+            else:
+                text1 = self.tokenizer(text1, max_length=self.max_len1 ,padding="max_length", truncation=True, return_tensors="pt")
+                text1 = {k: v.to(self.device) for k, v in text1.items()}
+                ipc = ipc.float().to(self.device)
+                outputs = self.model(text1, ipc)
             outputs = torch.sigmoid(outputs)
             outputs = outputs.to("cpu").detach().numpy()
             labels = labels.to("cpu").detach().numpy()
