@@ -29,7 +29,7 @@ class Bertmulticlassficationmodel(nn.Module):
         self.linear2 = nn.Linear(896, numlabel)
         self.dropout = nn.Dropout(p=dropout)
     
-    def forward(self, input):
+    def forward(self, text, ipc):
         text, ipc = input
         h = self.bert_model(*text)[0][:,0,:]
         h1 = self.linear1(h)
