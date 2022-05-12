@@ -8,11 +8,11 @@ from transformers import BertJapaneseTokenizer
 from patent_clas import model
 
 class model():
-    def __init__(self, numlabel, layer = 1, model_name='cl-tohoku/bert-base-japanese-v2', max_length = 512, result_path=None ,model_path = None, multi_gpu = False):
+    def __init__(self, numlabel, size = 128, layer = 1, dropout = 0.2, model_name='cl-tohoku/bert-base-japanese-v2', max_length = 512, result_path=None ,model_path = None, multi_gpu = False):
         if model_path==None & result_path==None:
             raise Exception("result_pathかmodel_pathを入力してください") 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') #GPUがつかえたらGPUを利用
-        self.model = model.Bertmulticlassficationmodel(numlabel, model_name, layer)
+        self.model = model.Bertmulticlassficationmodel(numlabel, model_name, size, layer, dropout)
         self.tokenizer = BertJapaneseTokenizer.from_pretrained(model_name)
         if model_path:
             self.model.load_state_dict(torch.load(model_path)["model_state_dict"])

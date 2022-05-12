@@ -4,13 +4,13 @@ from transformers import BertModel
 
 
 class ffnlayer(nn.Module):
-    def __init__(self, size):
+    def __init__(self, size, dropout):
         super().__init__()
         self.ffn = nn.Sequential(
             nn.Linear(size, size),
             nn.ReLU(inplace=True),
-            nn.Dropout(p=0.2),
-            nn.Linear(N, N),
+            nn.Dropout(p=dropout),
+            nn.Linear(size, size),
         )
     def forward(self,input):
         x = input
@@ -18,16 +18,16 @@ class ffnlayer(nn.Module):
         return y
 
 class Bertmulticlassficationmodel(nn.Module):
-    def __init__(self, numlabel, model_name, layer):
+    def __init__(self, numlabel, model_name, size, layer, dropout):
         super().__init__()
         self.bert_model = BertModel.from_pretrained(model_name)
         self.linear1 = nn.Linear(768, 768)
 
         self.allLayer = nn.ModuleList(
-            [ffnlayer(self.ipc) for _ in range(layer)],
+            [ffnlayer(size, dropout) for _ in range(layer)],
         )
         self.linear2 = nn.Linear(896, numlabel)
-        self.dropout = nn.Dropout(p=0.2)
+        self.dropout = nn.Dropout(p=dropout)
     
     def forward(self, input):
         text, ipc = input

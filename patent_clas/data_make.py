@@ -2,9 +2,12 @@ from torch.utils.data import Dataset, DataLoader
 from sklearn.model_selection import train_test_split
 from tqdm import tqdm
 import pandas as pd
+import torch
+import numpy as np
 
 def one_hot(label):
-    label_list = torch.zeros(len(label), 95)
+    max = np.max(label)
+    label_list = torch.zeros(len(label), max+1)
     for i, j in enumerate(tqdm(label)):
         label_list[i,j] = 1
     return label_list
@@ -12,7 +15,7 @@ def one_hot(label):
 def te_tr_va_split(data, test_size, val_size, random_state_tr_te, random_state_tr_val, shuffle):
     val_size = val_size/(1-test_size)
     d_textlist = data["発明課題文"].values.tolist()
-    a_textlist = data["要約"].values.tolist()
+    a_textlist = data["要約"].values
     ipc_list = data["vector"].values.tolist()
     labellist = data["分類"].values.tolist()
     d_text_train_ten, d_text_test, a_text_train_ten, a_text_test, ipc_train_ten, ipc_test, label_train_ten, label_test = train_test_split(d_textlist, a_textlist, ipc_list, one_hot(labellist), test_size=test_size, shuffle=shuffle, random_state=random_state_tr_te)
