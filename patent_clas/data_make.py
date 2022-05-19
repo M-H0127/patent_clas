@@ -46,7 +46,7 @@ def createDataloader(dataset,batch_size):
     dataset = createDataset(*dataset)
     return DataLoader(dataset, batch_size=batch_size)
 
-def main(data, test_size, val_size, random_state_tr_te=None, random_state_tr_val=None, shuffle=True, batch_size_te=32, batch_size_tr=32, batch_size_val=32):
+def data_make(data, test_size, val_size, random_state_tr_te=None, random_state_tr_val=None, shuffle=True, batch_size_te=32, batch_size_tr=32, batch_size_val=32):
     test, train, val = te_tr_va_split(data, test_size, val_size, random_state_tr_te, random_state_tr_val, shuffle)
     testloader = createDataloader(test, batch_size_te)
     trainloader = createDataloader(train, batch_size_tr)
