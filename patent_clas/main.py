@@ -9,7 +9,7 @@ from patent_clas import model
 
 class model():
     def __init__(self, numlabel, twotext=False, size = 128, layer = 1, dropout = 0.2, model_name='cl-tohoku/bert-base-japanese-v2', max_length1 = 512, max_length2 = 256, result_path=None ,model_path = None, multi_gpu = False):
-        if model_path==None & result_path==None:
+        if (model_path== None) & (result_path== None):
             raise Exception("result_pathかmodel_pathを入力してください") 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu') #GPUがつかえたらGPUを利用
         if twotext:
