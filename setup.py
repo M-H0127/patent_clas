@@ -11,7 +11,7 @@ setuptools.setup(
     description="You can predict class from BERT with patent text",
     url="https://github.com/M-H0127/patent_clas",
     packages=setuptools.find_packages(),
-    install_requires=["numpy", "scikit-learn", "torch", "transformers", "tqdm", "unidic-lite", "unidic", "fugashi", "ipadic"],
+    #install_requires=["numpy", "scikit-learn", "torch", "transformers", "tqdm", "unidic-lite", "unidic", "fugashi", "ipadic"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
