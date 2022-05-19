@@ -30,7 +30,7 @@ class Bertmodel_onetext(nn.Module):
         self.dropout = nn.Dropout(p=dropout)
     
     def forward(self, text, ipc):
-        h = self.bert_model(*text)[0][:,0,:]
+        h = self.bert_model(**text)[0][:,0,:]
         h1 = self.linear1(h)
         h2 = ipc
         for layer in self.allLayer:
