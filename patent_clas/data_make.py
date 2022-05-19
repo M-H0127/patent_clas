@@ -6,7 +6,7 @@ import torch
 import numpy as np
 
 def one_hot(label):
-    max = np.max(label)
+    max = np.max([x for row in label for x in row])
     label_list = torch.zeros(len(label), max+1)
     for i, j in enumerate(tqdm(label)):
         label_list[i,j] = 1
@@ -14,10 +14,10 @@ def one_hot(label):
 
 def te_tr_va_split(data, test_size, val_size, random_state_tr_te, random_state_tr_val, shuffle):
     val_size = val_size/(1-test_size)
-    d_textlist = data["発明課題文"].values.tolist()
+    d_textlist = data["発明課題文"].values
     a_textlist = data["要約"].values
-    ipc_list = data["vector"].values.tolist()
-    labellist = data["分類"].values.tolist()
+    ipc_list = data["vector"].values
+    labellist = data["分類"].values
     d_text_train_ten, d_text_test, a_text_train_ten, a_text_test, ipc_train_ten, ipc_test, label_train_ten, label_test = train_test_split(d_textlist, a_textlist, ipc_list, one_hot(labellist), test_size=test_size, shuffle=shuffle, random_state=random_state_tr_te)
     d_text_train, d_text_val, a_text_train, a_text_val, ipc_train, ipc_val, label_train, label_val = train_test_split(d_text_train_ten, a_text_train_ten, ipc_train_ten, label_train_ten, test_size=val_size, shuffle=shuffle, random_state=random_state_tr_val)
     return (d_text_test,a_text_test,ipc_test,label_test),(d_text_train,a_text_train,ipc_train,label_train),(d_text_val,a_text_val,ipc_val,label_val)
