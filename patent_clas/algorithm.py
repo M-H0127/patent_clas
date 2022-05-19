@@ -100,7 +100,7 @@ class algorithm():
         vali_loss = 0
         criterion = nn.BCEWithLogitsLoss()
         for data in tqdm(test):
-            text, ipc, labels = data
+            text1, text2, ipc, labels = data
             if self.twotext:
                 text1 = self.tokenizer(text1, max_length=self.max_len1 ,padding="max_length", truncation=True, return_tensors="pt")
                 text1 = {k: v.to(self.device) for k, v in text1.items()}
@@ -125,7 +125,7 @@ class algorithm():
         self.model.eval()
         pred_list=None
         for data in tqdm(test):
-            text, ipc, labels = data
+            text1, text2, ipc, labels = data
             if self.twotext:
                 text1 = self.tokenizer(text1, max_length=self.max_len1 ,padding="max_length", truncation=True, return_tensors="pt")
                 text1 = {k: v.to(self.device) for k, v in text1.items()}
